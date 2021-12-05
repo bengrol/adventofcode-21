@@ -1,7 +1,7 @@
 const loadInput = require('./load-input.js')
 //const indexD4 = require('./index-d3')
 
-loadInput.getDataD4_1().then(async function (page) {
+loadInput.getDataD4_1(true).then(async function (page) {
     await loadInput.getDataD4(function (data) {
         bingos = page.split('\n\n')
         bingos.forEach((bingo, index, bingos) => {
@@ -33,7 +33,7 @@ loadInput.getDataD4_1().then(async function (page) {
             }
 
         }
-    })
+    }, true)
 })
 
 function findInBingos(valueToFind, bingos, markedValuesCoordonne) {
