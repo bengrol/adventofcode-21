@@ -15,23 +15,20 @@ loadInput.getDataD4_1().then(async function (page) {
         // console.log(bingos)
         var markedValuesCoordonne = []
         bingos.forEach(()=>{
-            markedValuesCoordonne.push({ 'line': [0, 0, 0, 0, 0], 'col': [0, 0, 0, 0, 0] })
+            markedValuesCoordonne.push({ 'line': [0, 0, 0, 0, 0], 'col': [0, 0, 0, 0, 0], 'sumValue':0, 'lastValue':null })
         })
         for (let index = 0; index < data.length; index++) {
             const bingoResult = findInBingos(data[index], bingos, markedValuesCoordonne)
             if(bingoResult){
-                console.log('--- --- Bingo result => ', bingoResult)
+                
                 const winningBingo = bingos[bingoResult.bingoIndex]
-                if('line' in bingoResult){
-                    var sum =0
-                    winningBingo[bingoResult.line].forEach(e => sum += parseInt(e))
-                    console.log('--- --- sum bingo ', sum)
-                }
-                if('col' in bingoResult){
-                    var sum =0
-                    winningBingo.forEach(e => sum += parseInt(e[bingoResult.col]))
-                    console.log('--- --- sum bingo ', sum)
-                }
+                var sum = 0
+                winningBingo.forEach((lineBingo)=>{
+                    lineBingo.forEach(e=> sum += parseInt(e))
+                })
+                sum -= markedValuesCoordonne[bingoResult.bingoIndex].sumValue
+                sum *= markedValuesCoordonne[bingoResult.bingoIndex].lastValue
+                console.log('--- --- ########## the result is => ', sum)
                 break
             }
 
@@ -40,6 +37,7 @@ loadInput.getDataD4_1().then(async function (page) {
 })
 
 function findInBingos(valueToFind, bingos, markedValuesCoordonne) {
+    valueToFind = parseInt(valueToFind)
     var bingoResult = {}
     var bingoStop = false
     for (let bingoIndex = 0; bingoIndex < bingos.length; bingoIndex++) {
@@ -48,6 +46,8 @@ function findInBingos(valueToFind, bingos, markedValuesCoordonne) {
             const line = bingo[lineIndex]
             for (let index = 0; index < line.length; index++) {
                 if (parseInt(line[index]) == valueToFind) {
+                    markedValuesCoordonne[bingoIndex].sumValue += valueToFind
+                    markedValuesCoordonne[bingoIndex].lastValue = valueToFind
                     markedValuesCoordonne[bingoIndex].line[lineIndex]++
                     if (markedValuesCoordonne[bingoIndex].line[lineIndex] == 5) {
                         bingoResult = {bingoIndex :bingoIndex, line: lineIndex}
