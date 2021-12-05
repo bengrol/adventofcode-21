@@ -1,3 +1,4 @@
+const { debug } = require('console')
 const fs = require('fs')
 
 function getData(callBack, demo = true) {
@@ -47,6 +48,23 @@ var process = function () {
                 line.process = 'inCol'
                 processableLines.push(line)
             }
+            if ('undefined' == typeof line.process) {
+
+                if (line[0].col > line[1].col) {
+                    const reversedLine = [
+                        line[1],
+                        line[0]
+                    ]
+                    line = reversedLine
+                }
+                line.process = 'inDiag_natural'
+                if (line[0].line > line[1].line) {
+                    line.process = 'inDiag_reverse'
+                }
+
+                processableLines.push(line)
+            }
+
         })
 
         var grid = []
@@ -59,46 +77,65 @@ var process = function () {
         }
         var valueUpTo = 0
         processableLines.forEach((element) => {
-            if (element.process == 'inLine') {
-                const start = element[0].col
-                const end = element[1].col
-                if (start < end) {
+            let start, end
+            switch (element.process) {
+
+                case 'inLine':
+                    start = element[0].col < element[1].col ? element[0].col : element[1].col
+                    end = element[0].col > element[1].col ? element[0].col : element[1].col
+
                     for (let index = start; index <= end; index++) {
                         grid[element[0].line][index]++
                         if (grid[element[0].line][index] == 2) {
                             valueUpTo++
                         }
                     }
-                } else {
-                    for (let index = start; index >= end; index--) {
-                        grid[element[0].line][index]++
-                        if (grid[element[0].line][index] == 2) {
-                            valueUpTo++
-                        }
-                    }
-                }
+                    break;
 
-            }
-            if (element.process == 'inCol') {
-                const start = element[0].line
-                const end = element[1].line
-                if (start < end) {
+                case 'inCol':
+                    start = element[0].line < element[1].line ? element[0].line : element[1].line
+                    end = element[0].line > element[1].line ? element[0].line : element[1].line
                     for (let index = start; index <= end; index++) {
                         grid[index][element[0].col]++
                         if (grid[index][element[0].col] == 2) {
                             valueUpTo++
                         }
                     }
-                } else {
-                    for (let index = start; index >= end; index--) {
-                        grid[index][element[0].col]++
-                        if (grid[index][element[0].col] == 2) {
-                            valueUpTo++
+                    break;
+
+                default:
+                    //debug('inDiag')
+                    start = element[0].line
+                    end = element[1].line
+
+                    //if(element.process == 'inDiag_natural')
+
+                    if (element.process == 'inDiag_reverse') {
+                        let colProg = element[0].col
+                        for (let index = start; index >= end; index--) {
+                            grid[index][colProg]++
+                            if (grid[index][colProg] == 2) {
+                                valueUpTo++
+                            }
+                            colProg++
                         }
                     }
-                }
 
+                    if (element.process == 'inDiag_natural') {
+                        let colProg = element[0].col
+                        for (let index = start; index <= end; index++) {
+                            grid[index][colProg]++
+                            if (grid[index][colProg] == 2) {
+                                valueUpTo++
+                            }
+                            colProg++
+                        }
+                    }
+
+                    break;
             }
+
+
         })
 
         // grid.forEach((line) => {
