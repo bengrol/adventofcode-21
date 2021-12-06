@@ -27,12 +27,12 @@ var process = function () {
 
         for (let index = 0; index < 80; index++) {
             data.forEach((fish, e, data) => {
-                let newTimer = (fish - 1)
-                if (newTimer < 0) {
-                    newTimer = 6
+                fish -=1
+                if (fish < 0) {
+                    fish = 6
                     data.push(8)
                 }
-                data[e] = newTimer
+                data[e] = fish
             })
         }
         console.log('--- data som of fish  ', data.length)
