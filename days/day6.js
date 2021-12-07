@@ -1,41 +1,30 @@
-const { debug } = require('console')
-const fs = require('fs')
-
-function getData(callBack, demo = true) {
-
-    let fileToRead = './inputs/d6/input'
-    fileToRead += demo ? '-demo.txt' : '.txt'
-
-    fs.readFile(fileToRead, 'utf8', (err, data) => {
-        if (err) {
-            console.error(err)
-            return
-        }
-
-        data = data.split(',')
-        data.forEach((e, i, data) => {
-            data[i] = parseInt(e)
-        })
-        callBack(data)
-    })
-}
+//const { debug } = require('console')
+//const fs = require('fs')
 
 var process = function () {
-    const demo = true  // false for prod inputs
+    //dataObject[0] = [4,1,1,4,1,1,1,1,1,1,1,1,3,4,1,1,1,3,1,3,1,1,1,1,1,1,1,1,1,3,1,3,1,1,1,5,1,2,1,1,5,3,4,2,1,1,4,1,1,5,1,1,5,5,1,1,5,2,1,4,1,2,1,4,5,4,1,1,1,1,3,1,1,1,4,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5,1,1,2,1,1,1,1,1,1,1,2,4,4,1,1,3,1,3,2,4,3,1,1,1,1,1,2,1,1,1,1,2,5,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,4,1,5,1,3,1,1,1,1,1,5,1,1,1,3,1,2,1,2,1,3,4,5,1,1,1,1,1,1,5,1,1,1,1,1,1,1,1,3,1,1,3,1,1,4,1,1,1,1,1,2,1,1,1,1,3,2,1,1,1,4,2,1,1,1,4,1,1,2,3,1,4,1,5,1,1,1,2,1,5,3,3,3,1,5,3,1,1,1,1,1,1,1,1,4,5,3,1,1,5,1,1,1,4,1,1,5,1,2,3,4,2,1,5,2,1,2,5,1,1,1,1,4,1,2,1,1,1,2,5,1,1,5,1,1,1,3,2,4,1,3,1,1,2,1,5,1,3,4,4,2,2,1,1,1,1,5,1,5,2]
 
-    getData((data) => {
+    const fishesInput = [[3, 2], [4, 1], [1,1], [2,1]]
+    var sumOffish = 0
 
-        for (let index = 0; index < 80; index++) {
-            data.forEach((fish, e, data) => {
-                fish -=1
-                if (fish < 0) {
-                    fish = 6
-                    data.push(8)
-                }
-                data[e] = fish
-            })
+    fishesInput.forEach((e) => {
+        sumOffish += (processLifCycle(e[0], 256)* e[1])
+    })
+
+    function processLifCycle(fish, dureeDeVie) {
+        var ret = 1
+        for (let index = dureeDeVie; index > 0; index--) {
+            if (fish <= 0) {
+                fish = 6
+                ret += processLifCycle(8, (index - 1))
+            } else {
+                fish -= 1
+            }
         }
-        console.log('--- data som of fish  ', data.length)
-    }, demo)
+        return ret
+    }
+
+    console.log('--- sum of fish  ', sumOffish)
+
 }
 exports.process = process
