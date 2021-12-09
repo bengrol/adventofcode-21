@@ -15,72 +15,167 @@ function getData(callBack, demo = true) {
         callBack(data)
     })
 }
+function getBassinForLowPoint(lowPoint, data) {
+    let cases = [lowPoint]
+    let keepScanne = true
+
+    while (keepScanne) {
+        keepScanne = false
+        const newCases = scanneCases(cases, data)
+        if (newCases.length > 0) {
+            keepScanne = true
+            cases = [...newCases, ...cases]
+
+        }
+
+    }
+
+    return cases
+}
+
+
+
+function scanneCases(cases, data) {
+    const scannedStatus = 'scanned'
+
+    let newPoints = []
+    for (let index = 0; index < cases.length; index++) {
+
+        if (cases[index].state == scannedStatus) {
+            continue
+        }
+        const element = cases[index];
+        element.state = scannedStatus
+        data[element.line][element.col] = scannedStatus
+
+        if ('undefined' !== typeof data[element.line][element.col + 1]) {
+            let v = data[element.line][element.col + 1];
+            if (v < 9 && v !== scannedStatus) {
+                newPoints.push({
+                    line: element.line,
+                    col: element.col + 1,
+                })
+                data[element.line][element.col + 1] = scannedStatus
+            }
+        }
+        if ('undefined' !== typeof data[element.line][element.col - 1]) {
+            let v = data[element.line][element.col - 1]
+            if (v < 9 && v !== scannedStatus) {
+                newPoints.push({
+                    line: element.line,
+                    col: element.col - 1,
+                })
+                data[element.line][element.col - 1] = scannedStatus
+            }
+
+        }
+        if ('undefined' !== typeof data[element.line + 1] && 'undefined' !== typeof data[element.line + 1][element.col]) {
+            let v = data[element.line + 1][element.col]
+            if (v < 9 && v !== scannedStatus) {
+                newPoints.push({
+                    line: element.line + 1,
+                    col: element.col,
+                })
+                data[element.line + 1][element.col] = scannedStatus
+            }
+
+        }
+        if ('undefined' !== typeof data[element.line - 1] && 'undefined' !== typeof data[element.line - 1][element.col]) {
+            let v = data[element.line - 1][element.col]
+            if (v < 9 && v !== 'scanned') {
+                newPoints.push({
+                    line: element.line - 1,
+                    col: element.col,
+                })
+                data[element.line - 1][element.col] = scannedStatus
+            }
+
+        }
+    }
+    return newPoints
+}
+
+
+function getAllBassins(lowPoints, data) {
+    let bassins = []
+    lowPoints.forEach((e) => {
+        let bassin = getBassinForLowPoint(e, data)
+        bassins.push(bassin)
+
+    })
+
+    bassins.sort(function(a, b) {
+        return b.length - a.length;
+      });
+
+    return bassins.slice(0,3)
+}
 
 var process = function () {
     const demo = false  // false for prod inputs
     getData((data) => {
-        // todo format data in array//array int
         data.forEach((line, i, data) => {
             line = line.split('')
             line.forEach((value, j, current) => {
-                current[j] = parseInt(value)}
-                )
-                data[i]= line
+                current[j] = parseInt(value)
+            }
+            )
+            data[i] = line
         })
-        let sum = 0
+        let lowPoints = []
         data.forEach((line, i, data) => {
             line.forEach((value, j, currenteline) => {
                 let condition = 0 // must be equal to 4 
                 //console.log('--- --- value ', value)
                 // check left
-                if(j==0){
-                    condition ++
-                    console.log('--- start of the currenteline')
-                }else{
-                    if(currenteline[j-1]>value){
-                        condition ++
+                if (j == 0) {
+                    condition++
+                } else {
+                    if (currenteline[j - 1] > value) {
+                        condition++
                     }
                 }
-                
+
                 //check right
-                if(typeof currenteline[j+1] == 'undefined'){
-                    condition ++
-                    console.log('--- end of the currenteline')
-                }else{
-                    if(currenteline[j+1] >value){ 
-                        condition ++
+                if (typeof currenteline[j + 1] == 'undefined') {
+                    condition++
+                } else {
+                    if (currenteline[j + 1] > value) {
+                        condition++
                     }
                 }
 
                 // check up
-                if(i == 0){
+                if (i == 0) {
                     condition++
-                }else{
-                    if(value < data[i-1][j]){
-                        condition ++
+                } else {
+                    if (value < data[i - 1][j]) {
+                        condition++
                     }
                 }
 
                 // check bottom
-                if(typeof data[i+1] == 'undefined'){
+                if (typeof data[i + 1] == 'undefined') {
                     condition++
-                }else{
-                    if(value < (data[i+1][j])){
-                        condition ++
+                } else {
+                    if (value < (data[i + 1][j])) {
+                        condition++
                     }
                 }
 
-                debug
-                if(condition == 4){
-                    console.log('--- ---- ----  conditions == 4 => ', value)
-                    value +=1
-                    sum += value
+                if (condition == 4) {
+                    lowPoints.push({ line: i, col: j, state: 'new' })
                 }
             })
         })
 
-        console.log('--- ---- ----  sum value => ', sum)
+        console.log('--- ---- ----  lowPoints value => ', lowPoints)
 
+        let bassins = getAllBassins(lowPoints, data)
+        let sum = bassins[0].length * bassins[1].length * bassins[2].length 
+
+
+        console.log('--- --- result => ', sum)
     }, demo)
 }
 
