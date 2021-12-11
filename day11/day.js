@@ -1,9 +1,6 @@
 const { debug } = require('console')
 const fs = require('fs')
-const closingSignes = []
-const illegalCharacterPattern = {
-}
-
+const flashedFlag = 'flashed'
 
 function getData(callBack, demo = true) {
 
@@ -17,21 +14,173 @@ function getData(callBack, demo = true) {
         }
 
         data = data.split('\n')
+        data.forEach((element, i, data) => {
+            data[i] = element.split('').map(function (x) {
+                return parseInt(x, 10);
+            });
+        });
         callBack(data)
     })
 }
-var process = function () {
+const process = function () {
 
-    const demo = false  // false for prod inputs
-    getData((inputs) => {
+    const demo = true  // false for prod inputs
+    getData((data) => {
 
-        console.log('loggggg', inputs)
+        let sumOfFlash = 0
+        // console.log('--- --- ', inputs)
+        
+        const sumOfOctopus = data.length * data[0].length
 
+        for (let index = 0; index < 100; index++) {
+        let casesToFlash = []
+        // step 1
+        data.forEach((ligne, ligneIndex) => {
+            ligne.forEach((valeur, colonneIndex) => {
+                if (valeur === 9) {
+                    casesToFlash.push({ ligneIndex, colonneIndex })
+                }
+                data[ligneIndex][colonneIndex]++
+                //  console.log('--- --- --- --- valeur // ligne // colonne ', valeur, ligneIndex, colonneIndex)
+            });
+        });
+        // console.log('--- --- step 1  data => ', data)
+        // step 2 apply fash
+        
+        var keep = true
+        while (keep) {
+            keep = false
+            // let length = casesToFlash.length
+            // console.log('--- --- --- while loop casesToFlash ', casesToFlash)
+            if(casesToFlash.length >0){
+                const newcasesToFlash = applyFlash(casesToFlash, data)
+                if (newcasesToFlash.length > 0) {
+                    casesToFlash = casesToFlash.concat(newcasesToFlash)
+                    keep = true
+                }
+            }
+
+
+        }
+
+        
+        // reset flashedFlag
+        casesToFlash.forEach((caseToFlash) => { 
+            data[caseToFlash.ligneIndex][caseToFlash.colonneIndex] = 0 
+            sumOfFlash++
+        })
+        // console.log('--- --- data => ', data)
+        }
+        // step 3
+        debug
+
+
+        console.log('--- --- data => ', data)
+        console.log('--- --- ssumOfFlash => ',sumOfFlash )
     }, demo)
 
 }
 
+function applyFlash(casesToFlash, data) {
+    if(casesToFlash.length==0){
+        return casesToFlash
+    }
+    let newCasesToFlash = []
+    casesToFlash.forEach((caseToFlash) => {
 
+        let ligneIndex = caseToFlash.ligneIndex
+        let colonneIndex = caseToFlash.colonneIndex
 
+        if (data[ligneIndex][colonneIndex] !== flashedFlag) {
+            data[ligneIndex][colonneIndex] = flashedFlag
+            // check ligne -1 
+            if (typeof data[ligneIndex - 1] != 'undefined') {
+                ligneIndex--
+                const re = flash(data, ligneIndex, colonneIndex)
+                if (re) {
+                    newCasesToFlash.push(re)
+                }
+                if (typeof data[ligneIndex][colonneIndex - 1] != 'undefined') {
+                    const re = flash(data, ligneIndex, colonneIndex - 1)
+                    if (re) {
+                        newCasesToFlash.push(re)
+                    }
+                }
+                if (typeof data[ligneIndex][colonneIndex + 1] != 'undefined') {
+                    const re = flash(data, ligneIndex, colonneIndex + 1)
+                    if (re) {
+                        newCasesToFlash.push(re)
+                    }
+                }
+            }
+
+            ligneIndex = caseToFlash.ligneIndex
+            colonneIndex = caseToFlash.colonneIndex
+
+            // check colonne -1 
+            if (typeof data[ligneIndex][colonneIndex - 1] != 'undefined') {
+                colonneIndex--
+                const re = flash(data, ligneIndex, colonneIndex)
+                if (re) {
+                    newCasesToFlash.push(re)
+                }
+                // check diag
+                if (typeof data[ligneIndex + 1] != 'undefined') {
+                    const re = flash(data, ligneIndex + 1, colonneIndex)
+                    if (re) {
+                        newCasesToFlash.push(re)
+                    }
+                }
+            }
+
+            ligneIndex = caseToFlash.ligneIndex
+            colonneIndex = caseToFlash.colonneIndex
+            // check colone +1 
+            if (typeof data[ligneIndex][colonneIndex + 1] != 'undefined') {
+                colonneIndex++
+                const re = flash(data, ligneIndex, colonneIndex)
+                if (re) {
+                    newCasesToFlash.push(re)
+                }
+                // check diag
+                if (typeof data[ligneIndex + 1] != 'undefined') {
+                    const re = flash(data, ligneIndex + 1, colonneIndex)
+                    if (re) {
+                        newCasesToFlash.push(re)
+                    }
+                }
+
+            }
+
+            ligneIndex = caseToFlash.ligneIndex
+            colonneIndex = caseToFlash.colonneIndex
+            // check ligne +1 
+            if (typeof data[ligneIndex + 1] != 'undefined') {
+                ligneIndex++
+                const re = flash(data, ligneIndex, colonneIndex)
+                if (re) {
+                    newCasesToFlash.push(re)
+                }
+            }
+
+            ligneIndex = caseToFlash.ligneIndex
+            colonneIndex = caseToFlash.colonneIndex
+        } 
+
+    }, data)
+
+    return newCasesToFlash
+}
+
+function flash(data, ligneIndex, colonneIndex) {
+    if (data[ligneIndex][colonneIndex] == flashedFlag) {
+        return
+    }
+    data[ligneIndex][colonneIndex]++
+    if (data[ligneIndex][colonneIndex] == 10) {
+        return { ligneIndex, colonneIndex }
+    }
+    return
+}
 
 exports.process = process
