@@ -24,65 +24,84 @@ function getData(callBack, demo = true) {
 }
 const process = function () {
 
-    const demo = true  // false for prod inputs
+    const demo = false  // false for prod inputs
     getData((data) => {
 
         let sumOfFlash = 0
         // console.log('--- --- ', inputs)
-        
+
         const sumOfOctopus = data.length * data[0].length
 
-        for (let index = 0; index < 100; index++) {
-        let casesToFlash = []
-        // step 1
-        data.forEach((ligne, ligneIndex) => {
-            ligne.forEach((valeur, colonneIndex) => {
-                if (valeur === 9) {
-                    casesToFlash.push({ ligneIndex, colonneIndex })
-                }
-                data[ligneIndex][colonneIndex]++
-                //  console.log('--- --- --- --- valeur // ligne // colonne ', valeur, ligneIndex, colonneIndex)
-            });
-        });
-        // console.log('--- --- step 1  data => ', data)
-        // step 2 apply fash
-        
-        var keep = true
+        let keep = true
+        let nbOfStep = 0
         while (keep) {
-            keep = false
-            // let length = casesToFlash.length
-            // console.log('--- --- --- while loop casesToFlash ', casesToFlash)
-            if(casesToFlash.length >0){
-                const newcasesToFlash = applyFlash(casesToFlash, data)
-                if (newcasesToFlash.length > 0) {
-                    casesToFlash = casesToFlash.concat(newcasesToFlash)
-                    keep = true
-                }
+            nbOfStep ++
+            sumOfFlash = processFlash(data, sumOfFlash)
+            if(sumOfFlash==sumOfOctopus){
+                keep = false
+                console.log('***** ***** **** nbOfStep => ', nbOfStep)
+            }
+            if(nbOfStep>196){
+                debug
             }
 
-
+            
         }
-
         
-        // reset flashedFlag
-        casesToFlash.forEach((caseToFlash) => { 
-            data[caseToFlash.ligneIndex][caseToFlash.colonneIndex] = 0 
-            sumOfFlash++
-        })
         // console.log('--- --- data => ', data)
-        }
-        // step 3
-        debug
-
-
-        console.log('--- --- data => ', data)
-        console.log('--- --- ssumOfFlash => ',sumOfFlash )
+        // console.log('--- --- ssumOfFlash => ', sumOfFlash)
     }, demo)
 
 }
 
+function processFlash(data, sumOfFlash) {
+
+
+    let casesToFlash = []
+    // step 1
+    data.forEach((ligne, ligneIndex) => {
+        ligne.forEach((valeur, colonneIndex) => {
+            if (valeur === 9) {
+                casesToFlash.push({ ligneIndex, colonneIndex })
+            }
+            data[ligneIndex][colonneIndex]++
+            //  console.log('--- --- --- --- valeur // ligne // colonne ', valeur, ligneIndex, colonneIndex)
+        });
+    });
+    // console.log('--- --- step 1  data => ', data)
+    // step 2 apply fash
+
+    var keep = true
+    while (keep) {
+        keep = false
+        // let length = casesToFlash.length
+        // console.log('--- --- --- while loop casesToFlash ', casesToFlash)
+        if (casesToFlash.length > 0) {
+            const newcasesToFlash = applyFlash(casesToFlash, data)
+            if (newcasesToFlash.length > 0) {
+                casesToFlash = casesToFlash.concat(newcasesToFlash)
+                keep = true
+            }
+        }
+
+
+    }
+
+
+
+    // reset flashedFlag
+    casesToFlash.forEach((caseToFlash) => {
+        data[caseToFlash.ligneIndex][caseToFlash.colonneIndex] = 0
+        sumOfFlash++
+    })
+    // console.log('--- --- data => ', data)
+    return casesToFlash.length
+
+}
+
+
 function applyFlash(casesToFlash, data) {
-    if(casesToFlash.length==0){
+    if (casesToFlash.length == 0) {
         return casesToFlash
     }
     let newCasesToFlash = []
@@ -165,7 +184,7 @@ function applyFlash(casesToFlash, data) {
 
             ligneIndex = caseToFlash.ligneIndex
             colonneIndex = caseToFlash.colonneIndex
-        } 
+        }
 
     }, data)
 
