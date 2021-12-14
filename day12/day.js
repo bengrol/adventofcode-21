@@ -1,6 +1,6 @@
 const { debug } = require('console')
 const fs = require('fs')
-const flashedFlag = 'flashed'
+var counter = 0
 var correspondanceTable = {}
 
 function getData(callBack, demo = true) {
@@ -27,7 +27,7 @@ function getData(callBack, demo = true) {
 }
 const process = function () {
 
-    const demo = true  // false for prod inputs
+    const demo = false  // false for prod inputs
     getData((data) => {
 
         let sumResult = 0
@@ -54,44 +54,64 @@ const process = function () {
         //   });
 
         let paths = []
-        
         paths = getAvailablesPaths('start', correspondanceTable)
-        paths.forEach(e => {
-            let pathParcour = 'start'
-            pathParcour += ' - ' + e
-            const subPath = getAvailablesPaths(e, correspondanceTable, pathParcour)
-            builPathRecursively(subPath, pathParcour, 1)
-        })
+        builPathRecursively('start', 'start', 1)
+        
+        console.log('##### result => ', counter)
+    
 
     }, demo)
 
 }
 
 
-function builPathRecursively(paths, pathParcour, niveau = 0) {
+function builPathRecursively(node, pathParcour, niveau = 0) {
+    const paths = correspondanceTable[node]
+    
     paths.forEach(p => {
-        if (!pathParcour.includes(p) || p == p.toUpperCase()) {
-            pathParcour += ' - ' + p
-            if (p == 'end') {
-                console.log('--- --- --- --- ', pathParcour)
-            } else {
-                const newpathParcour = pathParcour
+
+        const lowerCase = pathParcour.split(' - ').filter((el) => el.toLowerCase() == el);
+        let hasDouble = false
+        lowerCase.forEach(e=>{
+            if (lowerCase.filter((n) => n == e).length > 1) {
+                hasDouble = true;
+              }
+        })
+
+        const reg = new RegExp('- '+p, "g")
+        let nodeCanBeUsed = false
+        if(p !== 'match' && p !== 'end'){
+           
+            if(hasDouble){
+                 // verif qu'il y a moins de 1 occurences du node
+                nodeCanBeUsed = ((pathParcour.match(reg) || []).length)<1
                 
-
-                let paths = getAvailablesPaths(p, correspondanceTable)
-
-                builPathRecursively(paths, newpathParcour, niveau++)
+            }else{
+                // verif qu'il y a moins de 2 occurences du node
+                nodeCanBeUsed = ((pathParcour.match(reg) || []).length)<2
+            }
+            
+            debug
+        }else{
+            nodeCanBeUsed = ((pathParcour.match(reg) || []).length)=1
+        }        
+        if (nodeCanBeUsed || p == p.toUpperCase()) {
+            let newpathParcour = pathParcour
+            newpathParcour += ' - ' + p
+            if (p == 'end') {
+                counter++
+               // console.log('--- --- --- --- ', newpathParcour)
+            } else {
+               
+                builPathRecursively(p, newpathParcour, niveau++)
             }
         }
         debug
-        // return null
-
     })
 }
 
-function getAvailablesPaths(entre, correspondanceTable) {
-    let availablesPaths = correspondanceTable[entre]
-    // remove pathParcour (minuscule ) in paths
-    return availablesPaths
+function getAvailablesPaths(entre) {
+    
+    return correspondanceTable[entre]
 }
 exports.process = process
