@@ -1,4 +1,4 @@
-const day = require('./day12/day')
+const day = require('./day14/day')
 
 
 day.process()
