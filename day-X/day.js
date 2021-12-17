@@ -1,7 +1,7 @@
 const { debug } = require('console')
 const fs = require('fs')
 const devMode = true
-const dayNum = 14
+const dayNum = 'x'
 const fileName = devMode ? "input-demo.txt" : "input.txt" 
 const path = "./day"+dayNum+"/inputs/"+fileName
 
@@ -20,9 +20,9 @@ const process = function () {
         
     })
 
-    pattern.redude()
+   
 
-    // console.log('--- --- pattern ', pattern)
+    
     // Object.keys(instructions).forEach(key => {
     //     console.log(key, instructions[key]);
     //     const regExpp = new RegExp(key, 'ig')
