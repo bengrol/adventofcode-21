@@ -1,13 +1,12 @@
 const { debug } = require('console')
 const fs = require('fs')
-const devMode = true
+const devMode = false
 const dayNum = 13
 const fileName = devMode ? "input-demo.txt" : "input.txt" 
 const path = "./day"+dayNum+"/inputs/"+fileName
 
 const read = fs.readFileSync(path);
 const input = read.toString().split('\n\n')
-
 
 const process = function () {
 
@@ -16,43 +15,86 @@ const process = function () {
     const dotsInstructions = input[0].split('\n')
     dotsInstructions.forEach((e, i, tab)=>{
         const ligne = e.split(',')
-        tab[i] = {x:ligne[0], y:ligne[1]}
+        tab[i] = {x:parseInt(ligne[0]), y:parseInt(ligne[1])}
     })
     let foldInstructions = input[1].split('\n')
     foldInstructions.forEach((e, i, tab)=>{
         tab[i] = e.replace('fold along ','').split('=')
-        debug
+        
     })
-
     
- 
 
-
-// calculer les dimensions x max & y max  ??
-// calculer les correspondances pour chaque foldsInstruction 
-// ex : si fold y=7
-// modifier tous les instructions avec un y > 7
-// 8,10 sera egale à 8,4  ==> (10-7)-7
-// 1,10 sera egale à 1,4   ==> (10-7)-7
-// 2,14 sera egale à  ==> (14-7)-7
-
-
-debug
-
-
-
-    // Object.keys(instructions).forEach(key => {
-    //     console.log(key, instructions[key]);
-    //     const regExpp = new RegExp(key, 'ig')
-    //     pattern = pattern.replaceAll(regExpp, instructions[key])
-    //     console.log('--- --- pattern ', pattern)
-    // });
+    foldInstructions.forEach(e=>{
+        let index = findDotsIndex(e[0], e[1], dotsInstructions)
+    })
     
-    
-    // console.log('--- --- pattern ', pattern)
-    console.log('--- input => ', input[1])
+
+let digitDisplayArray = []
+let maxX = 0
+let maxY = 0
+dotsInstructions.forEach(e=>{
+    if(e.x>maxX){
+        maxX = e.x
+    }
+    if(e.y>maxY){
+        maxY = e.y
+    }
+})
+
+for (let index = 0; index <= maxY; index++) {
+    let ligne = []
+    for (let index = 0; index <= maxX; index++) {
+        ligne.push('.')
+    }
+    digitDisplayArray.push(ligne)
+}
+
+dotsInstructions.forEach(e=>{
+    digitDisplayArray[e.y][e.x] = 'X'
+
+})
+
+digitDisplayArray.forEach(ligne=>{
+    console.log(ligne.join(''))
+})
 
 }
 
 
+function findDotsIndex(axe, value, dotsInstructions){
+    let index = []
+    dotsInstructions.forEach((e,i, tab)=>{
+        if((e[axe])>=value){
+            index.push(i)
+            let newValue = calculNewDots((e[axe]), value)
+            e[axe] = newValue
+            tab[i] = e
+            
+        }
+    })
+    return index
+}
+
+
+function calculNewDots(oldDots, folding){
+    return folding - (oldDots -  folding)
+}
+
+function getDoubleIndexes(dotsInstructions){
+    let indexToRemove = []
+    dotsInstructions.forEach((e, index)=>{
+        
+        dotsInstructions.forEach((sub, i, tab)=>{
+            
+            if(i != index){
+                if(e.x == sub.x && e.y == sub.y){
+                    indexToRemove.push(i)
+                }
+            }
+            
+        })
+    })
+
+return indexToRemove
+}
 exports.process = process
